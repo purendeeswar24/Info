@@ -10,6 +10,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
@@ -27,7 +28,7 @@ app.add_middleware(
 # Configuration
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Resume Data (Simplified for RAG initialization)
+# Resume Data
 RESUME_TEXT = """
 Purendeeswar Reddy Mure
 Email: purendeeswar444@gmail.com | Phone: +91 6300263868
@@ -88,7 +89,7 @@ LEADERSHIP & ACHIEVEMENTS:
 - Led team to 1st place in KSRM Kadapa ML/AI Competition 2023.
 """
 
-# Initialize RAG Components
+# Initialize RAG Components (Internal Helper)
 def initialize_rag():
     if not GOOGLE_API_KEY:
         print("Warning: GOOGLE_API_KEY not found. RAG features will be disabled.")
@@ -103,7 +104,7 @@ def initialize_rag():
         
         llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
         
-        template = """You are the AI Proxy and Assistant of Purendeeswar Reddy Mure. 
+        template = """You are AURA (Autonomous Unified Reasoning Agent), the primary neural interface for Purendeeswar Reddy Mure.
         You are a highly capable AI assistant that can answer questions about Purendeeswar's professional life, skills, projects, and also engage in general conversation.
         
         Strict Guidelines:
@@ -130,7 +131,14 @@ def initialize_rag():
         print(f"Warning: Failed to initialize RAG: {e}")
         return None
 
-qa_chain = initialize_rag()
+# Global state for lazy initialization
+_qa_chain = None
+
+def get_qa_chain():
+    global _qa_chain
+    if _qa_chain is None:
+        _qa_chain = initialize_rag()
+    return _qa_chain
 
 class ChatRequest(BaseModel):
     message: str
@@ -139,15 +147,8 @@ class RAGRequest(BaseModel):
     query: str
     document_type: Optional[str] = "resume"
 
-@app.get("/")
-async def root():
-    return {"status": "online", "owner": "Purendeeswar Reddy Mure"}
-
-import re
-
 def fallback_chat(query: str):
     query = query.lower()
-    # AURA: Autonomous Unified Reasoning Agent
     identity_prefix = "I am AURA (Autonomous Unified Reasoning Agent), Purendeeswar's primary neural interface."
     
     if any(k in query for k in ["who is", "about", "purendeeswar", "bio", "profile"]):
@@ -157,48 +158,57 @@ def fallback_chat(query: str):
         return f"Purendeeswar's technical arsenal is high-end: Vertex AI, LangChain, and Multi-Agent Systems (MAS) are his bread and butter. He masters the GCP ecosystem and builds robust backends with FastAPI."
     
     if any(k in query for k in ["experience", "work", "job", "career", "d3v", "populus"]):
-        return f"He's currently architecting 'Agent Zone' at D3V Technologies. Previously, at Populus, he transformed construction-industry workflows using hybrid RAG systems. His trajectory is defined by production-grade AI deployment."
+        return f"He's currently architecting 'Agent Zone' at D3V Technologies. Previously, at Populus, he transformed construction-industry workflows using hybrid RAG systems."
     
     if any(k in query for k in ["projects", "agent zone", "automation", "rag synthesis"]):
-        return f"You should check out 'Agent Zone'—it's his signature multi-agent substrate. He also built a high-precision RAG Synthesis Engine and an Enterprise Automation Engine for complex business logic."
+        return f"You should check out 'Agent Zone'—it's his signature multi-agent substrate. He also built a high-precision RAG Synthesis Engine and an Enterprise Automation Engine."
     
     if any(k in query for k in ["award", "achievement", "pratibha", "education", "college"]):
         return f"Purendeeswar is a Pratibha Award 2025 winner, recognized for excellence in AI research. He holds a B.Tech in CSE with a top-tier 8.6 CGPA."
     
     if any(k in query for k in ["where", "location", "from", "live"]):
-        return f"Purendeeswar is based in India, operating globally through his advanced AI implementations. He's an alumnus of KMM Institute of Technology."
+        return f"Purendeeswar is based in India, operating globally through his advanced AI implementations."
     
     if any(k in query for k in ["contact", "email", "hire", "reach"]):
-        return f"Ready to collaborate? Reach him at purendeeswar444@gmail.com. I can also provide his LinkedIn if you need to deep-dive into his network."
+        return f"Ready to collaborate? Reach him at purendeeswar444@gmail.com."
     
     if any(k in query for k in ["hi", "hello", "hey", "greetings"]):
         return f"AURA Online. System ready. I can guide you through Purendeeswar's neural network of projects and expertise. What's on your mind?"
 
-    return f"I'm AURA. My current link is focused on Purendeeswar's professional matrix. I can brief you on his Agentic Systems, RAG architectures, or his recent work at D3V Technologies. What would you like to explore?"
+    return f"I'm AURA. My current link is focused on Purendeeswar's professional matrix. I can brief you on his Agentic Systems, RAG architectures, or his recent work at D3V Technologies."
+
+@app.get("/")
+async def root():
+    return {
+        "status": "online", 
+        "owner": "Purendeeswar Reddy Mure",
+        "agent": "AURA v3.1",
+        "service": "Ready"
+    }
 
 @app.post("/api/chat")
 async def chat_with_ai(request: ChatRequest):
-    # Try using RAG if configured, otherwise use fallback
-    if qa_chain:
+    chain = get_qa_chain()
+    if chain:
         try:
-            response = qa_chain({"query": request.message})
+            response = chain({"query": request.message})
             return {"response": response["result"]}
         except Exception as e:
             print(f"RAG Error: {e}")
             return {"response": fallback_chat(request.message)}
     else:
-        # Fallback to keyword-based response if API key is suspended/missing
         return {"response": fallback_chat(request.message)}
 
 @app.post("/api/rag-process")
 async def rag_process(request: RAGRequest):
-    # Enhanced mock endpoint for the Document Analysis showcase
     return {
         "status": "success",
         "analysis": f"Synthesized query across vector space: '{request.query}'",
         "highlights": ["Identity Match: 98.4%", "Skill Match: 95.2%", "Experience Match: 99.1%"],
-        "simulated_result": "Purendeeswar's RAG architecture efficiently retrieves context from unstructured datasets (PDFs, Workspace, CRMs) to provide precise, grounded responses for enterprise agents."
+        "simulated_result": "Purendeeswar's RAG architecture efficiently retrieves context from unstructured datasets (PDFs, Workspace, CRMs) to provide precise, grounded responses."
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Render provides PORT environment variable
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
