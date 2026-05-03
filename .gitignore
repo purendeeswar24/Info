@@ -1,0 +1,19 @@
+# Dependencies
+node_modules
+.next
+build
+dist
+
+# Python
+venv
+__pycache__
+*.pyc
+.pytest_cache
+
+# Secrets & Env
+.env
+.env.local
+
+# OS Files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #020c1b;
+  --foreground: #ccd6f6;
+  --gold: #c5a021;
+  --gold-light: #f1d279;
+  --silver: #8892b0;
+  --navy-light: #112240;
+  --accent: var(--gold);
+  --accent-light: var(--gold-light);
+}
+
+[data-theme='emerald'] {
+  --gold: #10b981;
+  --gold-light: #34d399;
+}
+
+[data-theme='ruby'] {
+  --gold: #e11d48;
+  --gold-light: #fb7185;
+}
+
+[data-theme='cyan'] {
+  --gold: #06b6d4;
+  --gold-light: #22d3ee;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+.text-gold {
+  color: var(--gold);
+}
+
+.text-silver {
+  color: var(--silver);
+}
+
+.bg-navy-light {
+  background-color: var(--navy-light);
+}
+
+.glow-gold {
+  box-shadow: 0 0 20px rgba(197, 160, 33, 0.2);
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, #c5a021 0%, #f1d279 50%, #c5a021 100%);
+}
+
+.gradient-navy {
+  background: radial-gradient(circle at center, #112240 0%, #020c1b 100%);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
