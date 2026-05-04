@@ -6,10 +6,10 @@ from typing import List, Optional
 import uvicorn
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.chains import RetrievalQA
 
 load_dotenv()
 
@@ -26,6 +26,7 @@ app.add_middleware(
 
 # Configuration
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+print(f"DEBUG: GOOGLE_API_KEY status: {'LOADED' if GOOGLE_API_KEY else 'MISSING'}")
 
 # Resume Data
 RESUME_TEXT = """
@@ -91,17 +92,29 @@ LEADERSHIP & ACHIEVEMENTS:
 # Initialize RAG Components (Internal Helper)
 def initialize_rag():
     if not GOOGLE_API_KEY:
-        print("Warning: GOOGLE_API_KEY not found. RAG features will be disabled.")
+        print("❌ Warning: GOOGLE_API_KEY not found. RAG disabled.")
         return None
     
     try:
+        print("🛠️ Initializing AURA RAG Matrix...")
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         texts = text_splitter.split_text(RESUME_TEXT)
         
-        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+        print("  - Loading Embeddings...")
+        embeddings = GoogleGenerativeAIEmbeddings(
+            model="models/embedding-001",
+            google_api_key=GOOGLE_API_KEY
+        )
+        
+        print("  - Constructing Vector Store...")
         vector_store = FAISS.from_texts(texts, embeddings)
         
-        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
+        print("  - Linking Gemini LLM...")
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-1.5-flash", 
+            temperature=0.7,
+            google_api_key=GOOGLE_API_KEY
+        )
         
         template = """You are AURA (Autonomous Unified Reasoning Agent), the primary neural interface for Purendeeswar Reddy Mure.
         You are a highly capable AI assistant that can answer questions about Purendeeswar's professional life, skills, projects, and also engage in general conversation.
@@ -125,9 +138,10 @@ def initialize_rag():
             return_source_documents=True,
             chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
         )
+        print("✅ AURA RAG Matrix successfully initialized.")
         return qa_chain
     except Exception as e:
-        print(f"Warning: Failed to initialize RAG: {e}")
+        print(f"❌ CRITICAL ERROR during RAG initialization: {e}")
         return None
 
 # Global state for lazy initialization
