@@ -2,16 +2,23 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 import uvicorn
-import google.generativeai as genai
+
+# Restored Full RAG Imports (LangChain 0.3 Standard)
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from langchain_community.vectorstores import FAISS
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = FastAPI(title="Purendeeswar Portfolio API")
 
-# Enable CORS for Next.js frontend
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,13 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configuration
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if GOOGLE_API_KEY:
-    genai.configure(api_key=GOOGLE_API_KEY)
-    print("✅ Gemini AI Configured.")
-else:
-    print("❌ Warning: GOOGLE_API_KEY not found.")
 
 # The Full Context Matrix (Resume Data)
 RESUME_TEXT = """
@@ -54,50 +55,74 @@ ACHIEVEMENTS:
 - B.Tech CSE (8.6 CGPA) from KMM Institute.
 """
 
+def initialize_rag():
+    if not GOOGLE_API_KEY:
+        print("❌ GOOGLE_API_KEY missing")
+        return None
+    try:
+        print("🛠️ Initializing AURA RAG Matrix...")
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+        texts = text_splitter.split_text(RESUME_TEXT)
+        
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
+        vector_store = FAISS.from_texts(texts, embeddings)
+        
+        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7, google_api_key=GOOGLE_API_KEY)
+        
+        system_prompt = (
+            "You are AURA (Autonomous Unified Reasoning Agent), the primary neural interface for Purendeeswar Reddy Mure. "
+            "Use the following pieces of retrieved context to answer the user's question about Purendeeswar. "
+            "If asked general questions, answer them normally as a helpful AI. "
+            "Always maintain a professional and futuristic tone.\n\n"
+            "{context}"
+        )
+        
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", system_prompt),
+            ("human", "{input}"),
+        ])
+        
+        question_answer_chain = create_stuff_documents_chain(llm, prompt)
+        rag_chain = create_retrieval_chain(vector_store.as_retriever(), question_answer_chain)
+        print("✅ AURA RAG Matrix Online.")
+        return rag_chain
+    except Exception as e:
+        print(f"❌ RAG Error: {e}")
+        return None
+
+# Lazy Loading for stability
+_rag_chain = None
+
+def get_rag_chain():
+    global _rag_chain
+    if _rag_chain is None:
+        _rag_chain = initialize_rag()
+    return _rag_chain
+
 class ChatRequest(BaseModel):
     message: str
 
-def get_aura_response(user_query: str):
-    try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        prompt = f"""You are AURA (Autonomous Unified Reasoning Agent), the primary neural interface for Purendeeswar Reddy Mure.
-        Your goal is to answer questions about Purendeeswar's professional profile using the context provided below.
-        
-        Purendeeswar's Professional Context:
-        {RESUME_TEXT}
-        
-        Guidelines:
-        1. Use the context to answer accurately.
-        2. If asked about contact info, use purendeeswar444@gmail.com.
-        3. For general questions, be helpful and professional.
-        4. Maintain a futuristic, intelligent, and highly capable tone.
-        
-        User Query: {user_query}
-        AURA Response:"""
-        
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        print(f"AI Error: {e}")
-        return "AURA neural link unstable. Please try again."
-
 @app.api_route("/", methods=["GET", "HEAD"])
 async def root():
-    return {"status": "online", "owner": "Purendeeswar Reddy Mure", "agent": "AURA v3.1"}
+    return {"status": "online", "agent": "AURA v3.1", "matrix": "Restored"}
 
 @app.post("/api/chat")
 async def chat_with_ai(request: ChatRequest):
-    response = get_aura_response(request.message)
-    return {"response": response}
+    chain = get_rag_chain()
+    if chain:
+        try:
+            response = chain.invoke({"input": request.message})
+            return {"response": response["answer"]}
+        except Exception as e:
+            return {"response": "AURA neural link unstable. Please retry."}
+    return {"response": "AURA offline. Service initialization pending."}
 
 @app.post("/api/rag-process")
 async def rag_process():
-    return {
-        "status": "success",
-        "simulated_result": "Context synthesized successfully from the neural matrix."
-    }
+    return {"status": "success", "simulated_result": "Neural synthesis complete."}
 
 if __name__ == "__main__":
+    # Get port from Render or default to 8000
     port = int(os.environ.get("PORT", 8000))
+    print(f"🚀 AURA starting on port {port}...")
     uvicorn.run(app, host="0.0.0.0", port=port)
