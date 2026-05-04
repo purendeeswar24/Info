@@ -11,7 +11,6 @@ from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.chains import RetrievalQA
-from langchain_community.chains import RetrievalQA
 
 load_dotenv()
 
