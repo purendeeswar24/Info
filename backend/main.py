@@ -82,7 +82,7 @@ def get_aura_response(user_query: str):
         print(f"AI Error: {e}")
         return "AURA neural link unstable. Please try again."
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
     return {"status": "online", "owner": "Purendeeswar Reddy Mure", "agent": "AURA v3.1"}
 
