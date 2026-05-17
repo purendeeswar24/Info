@@ -1,24 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, Download, ArrowRight, Palette } from "lucide-react";
+import { Github, Linkedin, Mail, Download, ArrowRight } from "lucide-react";
 import { Reveal } from "./Reveal";
 
 export default function Hero() {
-  const [theme, setTheme] = useState("gold");
-  
-  const themes = [
-    { name: "gold", color: "#c5a021" },
-    { name: "emerald", color: "#10b981" },
-    { name: "ruby", color: "#e11d48" },
-    { name: "cyan", color: "#06b6d4" }
-  ];
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
-
   const handleStartProtocol = () => {
     window.dispatchEvent(new CustomEvent("open-aura"));
   };
@@ -30,31 +16,16 @@ export default function Hero() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#0a192f,0%,#020c1b_100%)]" />
         <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#8892b0_1px,transparent_1px),linear-gradient(to_bottom,#8892b0_1px,transparent_1px)] bg-[size:4rem_4rem]" />
         
-        {/* Ambient Gold Glows */}
+        {/* Ambient Glows (using CSS variables) */}
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[var(--gold)]/5 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[var(--gold)]/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Navigation - Premium glassmorphism */}
-      <nav className="fixed top-8 z-50 px-8 py-4 bg-[#112240]/40 backdrop-blur-xl border border-[#233554] rounded-full flex items-center gap-6 md:gap-10 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#8892b0]">
+      <nav className="fixed top-8 z-40 px-8 py-4 bg-[#112240]/40 backdrop-blur-xl border border-[#233554] rounded-full flex items-center gap-6 md:gap-10 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#8892b0]">
         <a href="#about" className="hover:text-[var(--gold)] transition-all">About</a>
-        <a href="#skills" className="hover:text-[var(--gold)] transition-all">Skills</a>
+        <a href="#arsenal" className="hover:text-[var(--gold)] transition-all">Arsenal</a>
         <a href="#projects" className="hover:text-[var(--gold)] transition-all">Projects</a>
-        <div className="w-[1px] h-4 bg-[#233554]" />
-        
-        {/* Theme Switcher */}
-        <div className="flex items-center gap-3">
-          {themes.map((t) => (
-            <button
-              key={t.name}
-              onClick={() => setTheme(t.name)}
-              className={`w-3 h-3 rounded-full border border-white/10 transition-transform ${theme === t.name ? 'scale-125 border-white/40' : 'hover:scale-110'}`}
-              style={{ backgroundColor: t.color }}
-              title={`${t.name} theme`}
-            />
-          ))}
-        </div>
-        
         <div className="w-[1px] h-4 bg-[#233554]" />
         <a href="mailto:purendeeswar444@gmail.com" className="text-[var(--gold)] hover:text-[var(--gold-light)] transition-all">Contact</a>
       </nav>
