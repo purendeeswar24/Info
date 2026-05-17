@@ -3,14 +3,22 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Send, X, Zap, Cpu } from "lucide-react";
+import RAGResultsPanel from "./RAGResultsPanel";
+
+interface RAGResult {
+  query: string;
+  retrieved_context: string[];
+  response: string;
+}
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "bot", text: "AURA System Initialized. I am your neural link to Purendeeswar's professional matrix. How shall we proceed?" }
+    { role: "bot", text: "PREDAI System Initialized. I am your AI assistant for Purendeeswar's professional profile. How can I help you today?" }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [ragResult, setRagResult] = useState<RAGResult | null>(null);
   
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +42,7 @@ export default function Chatbot() {
     const currentInput = input;
     setInput("");
     setIsLoading(true);
+    setRagResult(null); // Clear previous RAG result
 
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
@@ -43,6 +52,16 @@ export default function Chatbot() {
         body: JSON.stringify({ message: currentInput }),
       });
       const data = await response.json();
+      
+      // Store RAG result for display
+      if (data.retrieved_context) {
+        setRagResult({
+          query: data.query || currentInput,
+          retrieved_context: data.retrieved_context,
+          response: data.response,
+        });
+      }
+      
       setMessages((prev) => [...prev, { role: "bot", text: data.response }]);
     } catch (error) {
       setMessages((prev) => [...prev, { role: "bot", text: "Signal interference detected. Re-establishing link..." }]);
@@ -68,8 +87,8 @@ export default function Chatbot() {
                   <Cpu size={20} className="text-[var(--gold)]" />
                 </div>
                 <div>
-                  <span className="block font-black text-xs uppercase tracking-[0.2em] text-[#ccd6f6]">AURA v3.1</span>
-                  <span className="block text-[10px] text-[var(--gold)] font-bold uppercase tracking-widest animate-pulse">Neural Link Active</span>
+                  <span className="block font-black text-xs uppercase tracking-[0.2em] text-[#ccd6f6]">PREDAI v1.0</span>
+                  <span className="block text-[10px] text-[var(--gold)] font-bold uppercase tracking-widest animate-pulse">Professional Expert Data AI</span>
                 </div>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-[#8892b0] hover:text-[#ccd6f6] transition-colors"><X size={24} /></button>
@@ -91,6 +110,14 @@ export default function Chatbot() {
                   </div>
                 </div>
               ))}
+              
+              {/* RAG Results Display */}
+              {ragResult && (
+                <div className="mt-6">
+                  <RAGResultsPanel result={ragResult} isLoading={false} />
+                </div>
+              )}
+              
               {isLoading && (
                 <div className="flex gap-2 p-4">
                   <div className="w-2 h-2 rounded-full bg-[var(--gold)] animate-bounce" />
@@ -106,7 +133,7 @@ export default function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Query AURA..."
+                placeholder="Ask PREDAI..."
                 className="flex-1 bg-[#020c1b] border border-[#233554] rounded-xl px-4 py-3 text-sm text-[#ccd6f6] placeholder:text-[#8892b0]/50 focus:outline-none focus:border-[var(--gold)]/50 transition-colors tracking-wider"
               />
               <button 

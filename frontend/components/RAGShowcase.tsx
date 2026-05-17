@@ -9,9 +9,9 @@ export default function RAGShowcase() {
     <section className="py-40 px-6 max-w-7xl mx-auto overflow-hidden">
       <div className="text-center mb-24">
         <Reveal width="100%">
-          <h2 className="text-5xl md:text-7xl font-black mb-8 text-[#ccd6f6] tracking-tighter uppercase">Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--gold)] to-[var(--gold-light)]">AURA VOICE</span></h2>
+          <h2 className="text-5xl md:text-7xl font-black mb-8 text-[#ccd6f6] tracking-tighter uppercase">RAG System <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--gold)] to-[var(--gold-light)]">Knowledge Engine</span></h2>
         </Reveal>
-        <p className="text-[#8892b0] max-w-2xl mx-auto text-xl font-light tracking-wide">The next evolution of neural interaction. Bringing a voice to autonomous reasoning.</p>
+        <p className="text-[#8892b0] max-w-2xl mx-auto text-xl font-light tracking-wide">Retrieval Augmented Generation - Intelligent context-aware responses powered by professional expertise.</p>
       </div>
 
       <div className="relative group cursor-pointer">
@@ -40,22 +40,22 @@ export default function RAGShowcase() {
                 <Mic size={48} className="text-[#020c1b]" />
             </motion.div>
 
-            <h3 className="text-4xl md:text-6xl font-black text-[#ccd6f6] mb-6 tracking-tight relative z-10">COMING SOON</h3>
+            <h3 className="text-4xl md:text-6xl font-black text-[#ccd6f6] mb-6 tracking-tight relative z-10">ACTIVE</h3>
             
             <div className="flex items-center gap-4 px-8 py-3 bg-[#020c1b] rounded-full border border-[#233554] mb-12 relative z-10">
                 <Radio className="text-[var(--gold)] animate-pulse" size={20} />
-                <span className="text-xs font-black uppercase tracking-[0.3em] text-[#ccd6f6]">Status: Synchronizing_Frequencies</span>
+                <span className="text-xs font-black uppercase tracking-[0.3em] text-[#ccd6f6]">Status: Knowledge_Indexed</span>
             </div>
 
             <p className="text-[#8892b0] text-lg max-w-xl font-light leading-relaxed mb-10 relative z-10">
-                AURA is learning to speak. A hyper-personalized, voice-activated AI companion capable of real-time professional consultation and task orchestration.
+                PREDAI's RAG system retrieves relevant professional context to provide accurate, informed responses about Purendeeswar's expertise, experience, and projects.
             </p>
 
             <motion.div 
                 whileHover={{ scale: 1.05 }}
                 className="inline-flex items-center gap-3 text-[var(--gold)] font-black uppercase tracking-[0.4em] text-[10px] border-b-2 border-[var(--gold)]/30 pb-2 relative z-10"
             >
-                <Sparkles size={16} /> Notify Protocol Initialized
+                <Sparkles size={16} /> RAG Engine Active
             </motion.div>
         </div>
       </div>

@@ -1,17 +1,21 @@
 import Hero from "@/components/Hero";
 import About from "@/components/About";
-import Skills from "@/components/Skills";
+import TechnicalArsenal from "@/components/TechnicalArsenal";
+import RAGVisualization from "@/components/RAGVisualization";
 import Experience from "@/components/Experience";
 import Projects from "@/components/Projects";
 import RAGShowcase from "@/components/RAGShowcase";
 import Chatbot from "@/components/Chatbot";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 export default function Home() {
   return (
     <main className="min-h-screen">
+      <ThemeSwitcher />
       <Hero />
       <About />
-      <Skills />
+      <TechnicalArsenal />
+      <RAGVisualization />
       <Experience />
       <Projects />
       <RAGShowcase />
